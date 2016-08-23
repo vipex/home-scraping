@@ -1,3 +1,10 @@
-from scrapy import cmdline
+# Main runner
+from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings
+from hs.spiders.immobiliare import ImmobiliareSpider
 
-cmdline.execute("scrapy crawl immobiliare".split())
+# Use runner object to run the spider(s)
+runner = CrawlerProcess(get_project_settings())
+runner.crawl(ImmobiliareSpider)
+# runner.crawl(CasaSpider)
+runner.start()

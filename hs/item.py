@@ -1,7 +1,7 @@
 import scrapy
 
 
-class ImmobiliareItem(scrapy.Item):
+class HomeItem(scrapy.Item):
     ID = scrapy.Field()
     url = scrapy.Field()
 

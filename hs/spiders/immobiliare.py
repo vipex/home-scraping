@@ -2,9 +2,11 @@
 # Spider script for Immonbiliare.it
 # Last update: August 2016
 #
-import scrapy
-from item import ImmobiliareItem
 import re
+
+import scrapy
+
+from hs.item import HomeItem
 
 cleanUnicodePrice = re.compile("\D*(\d+\.\d+)\.*")
 
@@ -36,7 +38,7 @@ class ImmobiliareSpider(scrapy.Spider):
     # Parse single listing page
     @staticmethod
     def parse_the_listing(response):
-        item = ImmobiliareItem()
+        item = HomeItem()
 
         # TODO: Pirctures/Blueprints from _INITIAL_DATA js object
 
