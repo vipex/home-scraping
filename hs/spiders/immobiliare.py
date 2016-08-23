@@ -2,6 +2,7 @@
 # Spider script for Immonbiliare.it
 # Last update: August 2016
 #
+import json
 import re
 
 import scrapy
@@ -18,7 +19,6 @@ BASEQUERY = "/Torino/case_in_vendita-Torino.html?prezzoMassimo=170000&vrt=45.084
 class ImmobiliareSpider(scrapy.Spider):
     name = "immobiliare"
     allowed_domains = ["immobiliare.it"]
-    # start_urls = startUrls
     start_urls = [BASEDOMAIN+BASEQUERY]
 
     # Parse listing search page
@@ -26,7 +26,6 @@ class ImmobiliareSpider(scrapy.Spider):
         # Parse all announces ( still ok until: 2016 08 22 )
         for href in response.css('div .annuncio_title strong a::attr(href)').extract():
             url = response.urljoin(href)
-            # yield scrapy.Request(url.replace("www.", "m."), callback=self.parse_the_listing)
             yield scrapy.Request(url, callback=self.parse_the_listing)
 
         # Search for next page
@@ -39,8 +38,7 @@ class ImmobiliareSpider(scrapy.Spider):
     @staticmethod
     def parse_the_listing(response):
         item = HomeItem()
-
-        # TODO: Pirctures/Blueprints from _INITIAL_DATA js object
+        item['source'] = __name__.split(".")[-1]
 
         # Immobiliare listing own ID
         # From this:    http://www.immobiliare.it/57204928-Vendita-Bilocale-via-XX-Settembre-27-Grugliasco.html
@@ -48,8 +46,21 @@ class ImmobiliareSpider(scrapy.Spider):
         item['ID'] = response.url.split("/")[-1].split("-")[0]
 
         # Listing url
-        item['url'] = response.url  # .replace("m.", "www.")
+        item['url'] = response.url
 
+        # Extract _INITLIA_DATA json
+        jsonobj = response.xpath('//script').re(r'_INITIAL.*=[ ]*({.*});')
+        if jsonobj:
+            jsonobj = json.loads(jsonobj[0])
+        item['json'] = jsonobj
+
+        # Images & Blueprints
+        if jsonobj['multimedia']['immagini']['list']:
+            item['images'] = jsonobj['multimedia']['immagini']['list']
+        if jsonobj['multimedia']['planimetrie']['list']:
+            item['blueprints'] = jsonobj['multimedia']['planimetrie']['list']
+
+        # TODO: Use json from _INITIAL_DATA to fill the other fields
         # Description
         item['description'] = response.xpath(
             '//div[@id="description"]/div[contains(@class,"description-text")]/div/text()'
