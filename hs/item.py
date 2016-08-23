@@ -2,6 +2,12 @@ import scrapy
 
 
 class HomeItem(scrapy.Item):
+    source = scrapy.Field()
+    json = scrapy.Field()
+
+    images = scrapy.Field()
+    blueprints = scrapy.Field()
+
     ID = scrapy.Field()
     url = scrapy.Field()
 
