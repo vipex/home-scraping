@@ -140,7 +140,7 @@ COOKIES_ENABLED = False
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.contrib.downloadermiddleware.useragent.UserAgentMiddleware': None,
-    'hs.uaRandomizer.UserAgentMiddlewareRandomizer': 400
+    'hs.utility.UserAgentMiddlewareRandomizer': 400
 }
 
 # Enable or disable extensions
