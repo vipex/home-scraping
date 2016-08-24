@@ -85,7 +85,7 @@ class CasaSpider(scrapy.Spider):
         # Description
         item['description'] = validate_value(jsonobj['description'])
 
-        item['price'] = validate_value(['price'])
+        item['price'] = validate_value(jsonobj['price'])
 
         item['listingRef'] = validate_value(jsonobj['rif'])
         item['listingDate'] = validate_value(jsonobj['modifiedDate'])
