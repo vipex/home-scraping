@@ -8,6 +8,7 @@ import re
 import scrapy
 
 from hs.item import HomeItem
+from hs.utility import validate_value
 
 cleanUnicodePrice = re.compile("\D*(\d+\.\d+)\.*")
 
@@ -67,37 +68,44 @@ class CasaSpider(scrapy.Spider):
         jsonobj = response.xpath('//script').re(r'window.__INITIAL_STATE__.*=[ ]*({.*});')
         if jsonobj:
             jsonobj = json.loads(jsonobj[0])
-        item['json'] = jsonobj
+        if jsonobj['detail']['_map']:
+            item['json'] = jsonobj['detail']['_map']
+            jsonobj = jsonobj['detail']['_map']
+        else:
+            return
 
         # Images & Blueprints
-        item['images'] = []
-        item['blueprints'] = []
-        for i in jsonobj['detail']['_map']['media']:
+        item['images'] = item['blueprints'] = []
+        for i in jsonobj['media']:
             if i['type'] == 'mainphoto' or i['type'] == 'photo':
                 item['images'].append(i)
             elif i['type'] == 'floorplan':
                 item['blueprints'].append(i)
 
         # Description
-        item['description'] = jsonobj['detail']['_map']['description']
+        item['description'] = validate_value(jsonobj['description'])
 
-        item['price'] = jsonobj['detail']['_map']['price']
+        item['price'] = validate_value(['price'])
 
-        item['listingRef'] = jsonobj['detail']['_map']['rif']
-        item['listingDate'] = jsonobj['detail']['_map']['modifiedDate']
-        item['contract'] = jsonobj['detail']['_map']['channel']
-        item['propertyType'] = jsonobj['detail']['_map']['type']
-        item['area'] = jsonobj['detail']['_map']['landsize']
-        item['rooms'] = jsonobj['detail']['_map']['bedrooms']
-        item['floor'] = find_feature(jsonobj['detail']['_map']['features'], 'Piano')
-        item['box'] = jsonobj['detail']['_map']['parkingspaces']
-        item['availability'] = find_feature(jsonobj['detail']['_map']['features'], 'Stato al rogito')
-        item['year'] = find_feature(jsonobj['detail']['_map']['features'], 'Anno di costruzione')
-        item['condition'] = find_feature(jsonobj['detail']['_map']['features'], 'Condizioni')
-        item['heating'] = find_feature(jsonobj['detail']['_map']['features'], 'Riscaldamento')
-        item['energyEP'] = jsonobj['detail']['_map']['energyClass']['ipe']
-        item['energyClass'] = jsonobj['detail']['_map']['energyClass']['class']
-        item['address'] = jsonobj['detail']['_map']['address']
-        item['agency'] = jsonobj['detail']['_map']['agency']
+        item['listingRef'] = validate_value(jsonobj['rif'])
+        item['listingDate'] = validate_value(jsonobj['modifiedDate'])
+
+        item['contract'] = validate_value(jsonobj['channel'])
+        item['propertyType'] = validate_value(jsonobj['type'])
+        item['area'] = validate_value(jsonobj['landsize'])
+        item['rooms'] = validate_value(jsonobj['bedrooms'])
+        item['floor'] = find_feature(jsonobj['features'], 'Piano')
+        item['box'] = validate_value(jsonobj['parkingspaces'])
+        item['availability'] = find_feature(jsonobj['features'], 'Stato al rogito')
+
+        item['year'] = find_feature(jsonobj['features'], 'Anno di costruzione')
+        item['condition'] = find_feature(jsonobj['features'], 'Condizioni')
+        item['heating'] = find_feature(jsonobj['features'], 'Riscaldamento')
+        item['energyEP'] = validate_value(jsonobj['energyClass']['ipe'])
+        item['energyClass'] = validate_value(jsonobj['energyClass']['class'])
+
+        item['address'] = validate_value(jsonobj['address'])
+
+        item['agency'] = validate_value(jsonobj['agency'])
 
         yield item
