@@ -7,6 +7,6 @@ from hs.spiders.immobiliare import ImmobiliareSpider
 
 # Use runner object to run the spider(s)
 runner = CrawlerProcess(get_project_settings())
-# runner.crawl(ImmobiliareSpider)
+runner.crawl(ImmobiliareSpider)
 runner.crawl(CasaSpider)
 runner.start()

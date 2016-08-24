@@ -8,6 +8,7 @@ import re
 import scrapy
 
 from hs.item import HomeItem
+from hs.utility import validate_value
 
 cleanUnicodePrice = re.compile("\D*(\d+\.\d+)\.*")
 
@@ -55,12 +56,9 @@ class ImmobiliareSpider(scrapy.Spider):
         item['json'] = jsonobj
 
         # Images & Blueprints
-        if jsonobj['multimedia']['immagini']['list']:
-            item['images'] = jsonobj['multimedia']['immagini']['list']
-        if jsonobj['multimedia']['planimetrie']['list']:
-            item['blueprints'] = jsonobj['multimedia']['planimetrie']['list']
+        item['images'] = validate_value(jsonobj['multimedia']['immagini']['list'])
+        item['blueprints'] = validate_value(jsonobj['multimedia']['planimetrie']['list'])
 
-        # TODO: Use json from _INITIAL_DATA to fill the other fields
         # Description
         item['description'] = response.xpath(
             '//div[@id="description"]/div[contains(@class,"description-text")]/div/text()'
@@ -88,41 +86,34 @@ class ImmobiliareSpider(scrapy.Spider):
         tmp = response.xpath(
             '//dt[contains(text(), "Contratto")]/following::dd[1]/text()'
         ).extract()
-        if tmp:
-            item['contract'] = tmp[0]
+        item['contract'] = validate_value(tmp[0])
 
         tmp = response.xpath(
             '//dt[contains(text(), "Tipo propriet")]/following::dd[1]/text()'
         ).extract()
-        if tmp:
-            item['propertyType'] = tmp[0]
+        item['propertyType'] = validate_value(tmp[0])
 
         # Details
         tmp = response.xpath(
             '//dt[contains(text(), "Superficie")]/following::dd[1]/text()'
         ).extract()
-        if tmp:
-            item['area'] = tmp[0]
+        item['area'] = validate_value(tmp[0])
         tmp = response.xpath(
             '//dt[contains(text(), "Locali")]/following::dd[1]/text()'
         ).extract()
-        if tmp:
-            item['rooms'] = tmp[0]
+        item['rooms'] = validate_value(tmp[0])
         tmp = response.xpath(
             '//dt[contains(text(), "Piano")]/following::dd[1]/text()'
         ).extract()
-        if tmp:
-            item['floor'] = tmp[0]
+        item['floor'] = validate_value(tmp[0])
         tmp = response.xpath(
             '//dt[contains(text(), "Box e posti auto")]/following::dd[1]/text()'
         ).extract()
-        if tmp:
-            item['box'] = tmp[0]
+        item['box'] = validate_value(tmp[0])
         tmp = response.xpath(
             '//dt[contains(text(), "Disponibilit")]/following::dd[1]/text()'
         ).extract()
-        if tmp:
-            item['availability'] = tmp[0]
+        item['availability'] = validate_value(tmp[0])
 
         # TODO: Characteristics divided in "available" and "unavailable"
 
@@ -130,41 +121,33 @@ class ImmobiliareSpider(scrapy.Spider):
         tmp = response.xpath(
             '//dt[contains(text(), "Anno di costruzione")]/following::dd[1]/text()'
         ).extract()
-        if tmp:
-            item['year'] = tmp[0]
+        item['year'] = validate_value(tmp[0])
         tmp = response.xpath(
             '//dt[contains(text(), "Stato")]/following::dd[1]/text()'
         ).extract()
-        if tmp:
-            item['condition'] = tmp[0]
+        item['condition'] = validate_value(tmp[0])
         tmp = response.xpath(
             '//dt[contains(text(), "Riscaldamento")]/following::dd[1]/text()'
         ).extract()
-        if tmp:
-            item['heating'] = tmp[0]
+        item['heating'] = validate_value(tmp[0])
         tmp = response.xpath(
             '//dt[contains(text(), "Indice di prestazione energetica")]/following::dd[1]/text()'
         ).extract()
-        if tmp:
-            item['energyEP'] = tmp[0]
+        item['energyEP'] = validate_value(tmp[0])
         tmp = response.xpath(
             '//div[@class="indicator-energy"]/@data-energyclass'
         ).extract()
-        if tmp:
-            item['energyClass'] = tmp[0]
+        item['energyClass'] = validate_value(tmp[0])
 
         # Address
         tmp = response.xpath(
             '//div[@class="maps-address"]/p/span/strong/text()'
         ).extract()
-        if tmp:
-            item['address'] = tmp[0]
-        # item['address'] = [x.strip() for x in response.xpath('//div[contains(@class,"indirizzo_")]/text()').extract()]
+        item['address'] = validate_value(tmp[0])
 
         tmp = response.xpath(
             '//div[@class="detail-agency-logo"]/img/@alt'
         ).extract()
-        if tmp:
-            item['agency'] = tmp[0]
+        item['agency'] = validate_value(tmp[0])
 
         yield item
